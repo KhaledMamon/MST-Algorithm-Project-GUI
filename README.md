@@ -1,21 +1,22 @@
 
-Project Title: Minimum Spanning Tree (MST) Visualization
-Course: CS315 - Algorithm Analysis and Design
+# Project Algorithm Analysis and Design
+### Project Title: Minimum Spanning Tree (MST) Visualization
 
-Group Members:
-1. Khaled Gamal - ID: [Your ID]
-2. [Student Name] - ID: [ID]
-3. [Student Name] - ID: [ID]
+#### El-Team:
+1. Khaled Gamal Mamon   - Sec: 3 - ID: 
+2. Khaled mohammed taha - Sec: 3 - ID: 
+3. Same                 - Sec:   - ID: 
 
 
-Files Description:
-- algorithm1.py: Contains the Naive solution implementation (using DFS for cycle detection).
-- algorithm2.py: Contains the Optimized solution implementation (using Union-Find data structure).
-- main_gui.py: The main application file. It provides a Graphical User Interface (GUI) to visualize the buildings, execute both algorithms, and compare their performance in real-time.
-- Final_Report.pdf: Comprehensive documentation of the project.
+Project Description:
+
+- algorithm1.py: Naive solution (using DFS for cycle detection).
+- algorithm2.py: Optimized solution (using Union-Find data structure).
+- main_gui.py: It provides a Graphical User Interface (GUI) to visualize the buildings, execute both algorithms.
+- Final_Report.pdf: Documentation of the project.
 -----------------------------------------------------------------------------------------------
 
-1. Pseudocode for Algorithm 1: Naive Approach
+## 1. Pseudocode for Algorithm 1: Naive Approach
 Description: This algorithm sorts all edges by weight and iterates through them. Before adding an edge to the MST, it performs a Depth First Search (DFS) traversal on the current tree to check if a path already exists between the two endpoints. If a path exists, the edge is discarded to prevent a cycle.
 
   FUNCTION HasPathDFS(Graph, CurrentNode, TargetNode, VisitedSet):
@@ -59,7 +60,7 @@ FUNCTION NaiveMST(Vertices, Edges):
 
 ------------------------------------------------------------------------------------------------
 
-2. Pseudocode for Algorithm 2: Optimized Approach
+## 2. Pseudocode for Algorithm 2: Optimized Approach
 Description: This algorithm also sorts edges by weight but uses the Disjoint Set Union (DSU) or Union-Find data structure to detect cycles efficiently. It checks if the two endpoints of an edge belong to the same set. If they do not, it unions the sets and adds the edge. This reduces the cycle check complexity to nearly constant time.
 
 STRUCTURE UnionFind:
