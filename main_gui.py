@@ -4,49 +4,35 @@ import random
 import math
 import time
 
-# =======================================================
-# استيراد الخوارزميات من الملفات الخارجية (Modular Design)
-# =======================================================
-try:
-    from algorithm1 import run_naive_mst
-    from algorithm2 import run_optimized_mst
-except ImportError:
-    print("Error: ملفات algorithm1.py و algorithm2.py يجب أن تكون في نفس المجلد!")
-    exit()
+from algorithm1 import run_naive_mst
+from algorithm2 import run_optimized_mst
 
-# =======================================================
-# كود الواجهة الرسومية (GUI)
-# =======================================================
 
+# =========================(GUI)==============================
 class MSTApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Project: MST Algorithms Comparison")
-        self.root.geometry("900x650")
+        self.root.geometry("1200x650")
 
-        # --- شريط التحكم (الأزرار) ---
         self.control_frame = tk.Frame(root, bg="#f0f0f0", pady=15, padx=10)
         self.control_frame.pack(side=tk.TOP, fill=tk.X)
 
-        # زر 1: توزيع المباني
         self.btn_generate = tk.Button(self.control_frame, text="1. Generate Buildings", 
                                     command=self.generate_buildings, 
                                     bg="#3498db", fg="white", font=("Arial", 10, "bold"))
         self.btn_generate.pack(side=tk.LEFT, padx=10)
 
-        # زر 2: الحل الساذج (يستدعي algorithm1)
         self.btn_naive = tk.Button(self.control_frame, text="2. Run Naive (DFS)", 
                                 command=self.solve_naive, 
                                 bg="#e74c3c", fg="white", font=("Arial", 10, "bold"))
         self.btn_naive.pack(side=tk.LEFT, padx=10)
 
-        # زر 3: الحل المحسن (يستدعي algorithm2)
         self.btn_opt = tk.Button(self.control_frame, text="3. Run Optimized (Union-Find)", 
                                 command=self.solve_optimized, 
                                 bg="#2ecc71", fg="white", font=("Arial", 10, "bold"))
         self.btn_opt.pack(side=tk.LEFT, padx=10)
 
-        # --- شريط المعلومات (لعرض الوقت والتكلفة) ---
         self.info_frame = tk.Frame(root, bg="#ddd", pady=5)
         self.info_frame.pack(side=tk.TOP, fill=tk.X)
         
@@ -59,49 +45,43 @@ class MSTApp:
         self.lbl_cost = tk.Label(self.info_frame, text="Cost: 0", font=("Arial", 11, "bold"), bg="#ddd")
         self.lbl_cost.pack(side=tk.RIGHT, padx=20)
 
-        # --- لوحة الرسم (Canvas) ---
         self.canvas = tk.Canvas(root, bg="white")
         self.canvas.pack(fill=tk.BOTH, expand=True)
 
-        # المتغيرات
         self.buildings = [] 
-        self.num_buildings = 300 # عدد المباني الافتراضي (يمكنك تغييره لاختبار السرعة)
+        self.num_buildings = 700 # Num of Duildings
 
+
+# =========================(Functions)==============================
     def generate_buildings(self):
-        """توليد نقاط عشوائية (مباني) على الشاشة"""
-        self.canvas.delete("all") # مسح الشاشة
+        self.canvas.delete("all") 
         self.buildings = []
         
-        # تصفير العدادات
         self.lbl_cost.config(text="Cost: 0")
         self.lbl_time.config(text="Time: 0.000s")
         self.lbl_status.config(text="Status: Buildings Generated")
 
-        # أبعاد الشاشة
         width = self.canvas.winfo_width()
         height = self.canvas.winfo_height()
-        # حماية ضد التشغيل قبل اكتمال تحميل النافذة
+
         if width < 100: width = 800
         if height < 100: height = 600
 
-        # حلقة لإنشاء النقاط
         for i in range(self.num_buildings):
             x = random.randint(50, width - 50)
             y = random.randint(50, height - 50)
             self.buildings.append((x, y))
             
-            # رسم دائرة صغيرة تمثل المبنى
             r = 5
             self.canvas.create_oval(x-r, y-r, x+r, y+r, fill="#34495e", outline="")
             self.canvas.create_text(x, y-10, text=str(i), fill="#95a5a6", font=("Arial", 7))
 
     def prepare_edges(self):
-        """حساب المسافات بين كل المباني وتجهيز القائمة للخوارزميات"""
         edges = []
         n = len(self.buildings)
         for i in range(n):
             for j in range(i + 1, n):
-                # حساب المسافة (Euclidean Distance)
+                # (Euclidean Distance)
                 x1, y1 = self.buildings[i]
                 x2, y2 = self.buildings[j]
                 dist = math.sqrt((x1-x2)**2 + (y1-y2)**2)
@@ -109,59 +89,50 @@ class MSTApp:
         return edges, n
 
     def draw_results(self, mst_edges, cost, exec_time, method_name, color):
-        """رسم الخطوط الناتجة من الخوارزمية"""
-        self.canvas.delete("cable") # مسح الخطوط القديمة فقط
+        self.canvas.delete("cable") 
         
         for u, v, w in mst_edges:
             x1, y1 = self.buildings[u]
             x2, y2 = self.buildings[v]
-            # رسم الخط
             self.canvas.create_line(x1, y1, x2, y2, fill=color, width=2, tags="cable")
         
-        self.canvas.tag_lower("cable") # إرسال الخطوط للخلفية لتظهر المباني فوقها
+        self.canvas.tag_lower("cable") 
         
-        # تحديث النصوص
         self.lbl_cost.config(text=f"Cost: {int(cost)}")
         self.lbl_time.config(text=f"Time: {exec_time:.6f}s")
         self.lbl_status.config(text=f"Status: Solved by {method_name}")
 
+# =========================(Naive)==============================
     def solve_naive(self):
-        """تشغيل الحل الساذج"""
         if not self.buildings: return
         self.lbl_status.config(text="Running Naive (DFS)... Please Wait")
-        self.root.update() # تحديث الشاشة قبل التجميد
+        self.root.update() 
         
-        # 1. تجهيز البيانات
         edges, n = self.prepare_edges()
         
-        # 2. تشغيل الخوارزمية (من ملف algorithm1.py) وحساب الوقت
         start_time = time.time()
         mst_edges, cost = run_naive_mst(n, edges)
         end_time = time.time()
         
-        # 3. رسم النتيجة (أحمر)
         self.draw_results(mst_edges, cost, end_time - start_time, "Naive (DFS)", "#e74c3c")
 
+# =========================(Optimized)==============================
     def solve_optimized(self):
-        """تشغيل الحل المحسن"""
         if not self.buildings: return
         
         edges, n = self.prepare_edges()
         
-        # 1. تشغيل الخوارزمية (من ملف algorithm2.py) وحساب الوقت
         start_time = time.time()
         mst_edges, cost = run_optimized_mst(n, edges)
         end_time = time.time()
         
-        # 2. رسم النتيجة (أخضر)
         self.draw_results(mst_edges, cost, end_time - start_time, "Optimized (Union-Find)", "#2ecc71")
 
-# =======================================================
-# نقطة الدخول الرئيسية للبرنامج
-# =======================================================
 if __name__ == "__main__":
     root = tk.Tk()
     app = MSTApp(root)
-    # توليد مباني تلقائياً بعد نصف ثانية من التشغيل
     root.after(500, app.generate_buildings)
     root.mainloop()
+
+
+
